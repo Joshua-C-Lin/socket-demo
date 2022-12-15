@@ -40,17 +40,34 @@ export default {
   },
   methods: {
     join() {
-      console.log(this.currentUser, "已登入！");
       this.isJoin = true;
-      
+      // let userName = this.currentUser;
+
       this.socketInstance = io("http://localhost:3000");
+      var socket = io.connect("http://localhost:3000");
 
       this.socketInstance.on(
+        // console.log(userName, "已登入！"),
+        // alert("連線成功"),
         // 監聽 Server 傳來的 message:received 事件
-        "message:received", (data) => {
-          this.messagesList = this.messagesList.concat(data)
+        "message:received",
+        (data) => {
+          this.messagesList = this.messagesList.concat(data);
         }
-      )
+      );
+      socket.on("chat message", () => {
+        console.log("連線成功！！！");
+      });
+      this.socketInstance.on("connection", (socket) => {
+        socket.on("chat message", (msg) => {
+          console.log("message: " + msg);
+        });
+      });
+      // 連結成功通知
+      socket.on("connect", () => {
+        alert(this.currentUser + " 連線成功！");
+        console.log(socket.id, "Connected!!!");
+      });
     },
     sendMessage() {
       if (this.textMsg === "") {
@@ -71,9 +88,9 @@ export default {
       this.messagesList = this.messagesList.concat(message);
 
       // 把資料同步給 Server
-      this.socketInstance.emit('message', message);
+      this.socketInstance.emit("message", message);
     },
-  },
+  }
 };
 </script>
 
